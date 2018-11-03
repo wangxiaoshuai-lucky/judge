@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- 定义producer的参数 -->
+  <bean id="producerFactory" class="org.springframework.kafka.core.DefaultKafkaProducerFactory">
+    <constructor-arg>
+      <map>
+        <entry key="bootstrap.servers" value="${bootstrap.servers}"/>
+        <entry key="group.id" value="${consumer.group.id}"/>
+        <entry key="retries" value="10"/>
+        <entry key="batch.size" value="16384"/>
+        <entry key="linger.ms" value="1"/>
+        <entry key="buffer.memory" value="33554432"/>
+        <entry key="key.serializer" value="org.apache.kafka.common.serialization.StringSerializer"/>
+        <entry key="value.serializer" value="org.apache.kafka.common.serialization.StringSerializer"/>
+      </map>
+    </constructor-arg>
+  </bean>
+  <!--发送消息的监听器-->
+  <bean id="listener" class="cn.wzy.kafka.Listener"/>
+  <!-- 创建kafkatemplate bean，使用的时候，只需要注入这个bean，即可使用template的send消息方法 -->
+  <bean id="KafkaTemplate" class="org.springframework.kafka.core.KafkaTemplate">
+    <constructor-arg ref="producerFactory"/>
+    <constructor-arg name="autoFlush" value="true"/>
+    <property name="defaultTopic" value="${producer.topic}"/>
+    <property name="producerListener" ref="listener"/>
+  </bean>
+
+</beans>

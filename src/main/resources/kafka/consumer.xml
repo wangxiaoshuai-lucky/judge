@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+  <!-- 定义consumer的参数 -->
+  <bean id="consumerFactory" class="org.springframework.kafka.core.DefaultKafkaConsumerFactory">
+    <constructor-arg>
+      <map>
+        <entry key="bootstrap.servers" value="${bootstrap.servers}"/>
+        <entry key="group.id" value="1"/>
+        <entry key="enable.auto.commit" value="true"/>
+        <entry key="auto.commit.interval.ms" value="1000"/>
+        <entry key="session.timeout.ms" value="15000"/>
+        <entry key="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+        <entry key="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <!-- 实际执行消息消费的类 -->
+  <bean id="consumer" class="cn.wzy.kafka.JudgeConsumer"/>
+
+  <!-- 消费者容器配置信息 -->
+  <bean id="containerProperties" class="org.springframework.kafka.listener.config.ContainerProperties">
+    <constructor-arg value="${consumer.topic}"/>
+    <property name="messageListener" ref="consumer"/>
+  </bean>
+
+  <bean id="messageListenerContainer" class="org.springframework.kafka.listener.KafkaMessageListenerContainer"
+        init-method="doStart">
+    <constructor-arg ref="consumerFactory"/>
+    <constructor-arg ref="containerProperties"/>
+  </bean>
+
+</beans>
