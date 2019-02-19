@@ -32,6 +32,12 @@ public class Judge {
       ExecutorUtil.exec("rm -rf " + path);
       return result;
     }
+    //verify the key
+		if (!verify(task.getSource())) {
+			result.setStatus(9);
+			ExecutorUtil.exec("rm -rf " + path);
+			return result;
+		}
     //compile the source
     String message = complie(task.getCompilerId(), path);
     if (message != null && task.getCompilerId() != 4) {
@@ -79,6 +85,15 @@ public class Judge {
     output.close();
   }
 
+  private static boolean verify(String source) {
+  	String[] keys = PropertiesUtil.StringValue("dangerousKeys").split(",");
+  	for (String key: keys) {
+  		if (source.contains(key))
+  			return false;
+		}
+  	return true;
+	}
+
   private static String complie(int compilerId, String path) {
     /**
      *  '1': 'gcc','g++', '3': 'java', '4': 'pascal', '5': 'python',
@@ -86,10 +101,10 @@ public class Judge {
     String cmd = "";
     switch (compilerId) {
       case 1:
-        cmd = "gcc " + path + "/main.c -o " + path + "/main";
+        cmd = "gcc " + path + "/main.c -o " + path + "/main " + PropertiesUtil.StringValue("gccAddition");
         break;
       case 2:
-        cmd = "g++ " + path + "/main.cpp -o " + path + "/main";
+        cmd = "g++ " + path + "/main.cpp -o " + path + "/main "+ PropertiesUtil.StringValue("g++Addition");
         break;
       case 3:
         cmd = "javac " + path + "/Main.java";
